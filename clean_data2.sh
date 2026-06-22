@@ -1,40 +1,45 @@
 #!/bin/bash
-# Verdent Trial Reset — Completo e corrigido (macOS)
-# Apaga todos os vestígios locais conhecidos do Verdent.
+# Verdent Trial Reset - gera novos IDs de dispositivo (macOS)
 
-echo "=== Verdent Reset ==="
+echo "=== Verdent Trial Reset ==="
 
-# 1. Fechar a aplicação (se estiver a correr)
+# Fechar a app
 pkill -i Verdent 2>/dev/null
 sleep 1
 
-# 2. Remover a pasta principal de suporte (Application Support)
+# Apagar todos os dados locais
 rm -rf ~/Library/Application\ Support/Verdent
-
-# 3. Remover logs
 rm -rf ~/Library/Logs/Verdent
-
-# 4. Remover preferências
-rm -f ~/Library/Preferences/ai.verdent.deck.plist
-
-# 5. Remover saved state (se existir)
+rm -f  ~/Library/Preferences/ai.verdent.deck.plist
 rm -rf ~/Library/Saved\ Application\ State/com.verdent.app.savedState 2>/dev/null
+sudo rm -rf ~/.verdent
 
-# 6. ⚠️ Pasta oculta descoberta pelo Opus 4.8 e confirmada pelo teu find
-# Contém workspaces, base de dados de sessões, config e o "lastLoggedInUserId"
-if [ -d ~/.verdent ]; then
-    echo "A remover ~/.verdent (pode pedir password para sudo)..."
-    sudo rm -rf ~/.verdent
-fi
+# Criar a pasta de Application Support
+mkdir -p ~/Library/Application\ Support/Verdent/sentry/queue
 
+# Gerar um novo device_id (UUID fresco)
+NEW_DEVICE_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+
+# Escrever o scope_v3.json com o novo device_id e firstActive: true
+cat > ~/Library/Application\ Support/Verdent/sentry/scope_v3.json <<EOF
+{
+  "scope": {
+    "tags": {
+      "device_id": "${NEW_DEVICE_ID}"
+    }
+  },
+  "event": {}
+}
+EOF
+
+# Criar o ficheiro verdent-storage.json com firstActive: true
+echo '{"firstActive": true, "anchor": ""}' > ~/Library/Application\ Support/Verdent/verdent-storage.json
+
+# Tornar ambos os ficheiros só de leitura (como o Cursor faz)
+chmod 444 ~/Library/Application\ Support/Verdent/verdent-storage.json
+chmod 444 ~/Library/Application\ Support/Verdent/sentry/scope_v3.json
+
+echo "Novo device_id: ${NEW_DEVICE_ID}"
+echo "firstActive: true"
 echo ""
-echo "✅ Reset completo. Todos os dados locais do Verdent foram apagados."
-echo ""
-echo "Agora:"
-echo "1. Liga a VPN (Warp) para mudar de IP público."
-echo "2. Usa um email NOVO (nunca usado no Verdent)."
-echo "3. Abre o Verdent — ele vai gerar um novo anchor e device_id."
-echo ""
-echo "NOTA: Se o servidor pedir cartão de crédito, isso é uma verificação server‑side"
-echo "      e não pode ser contornada com scripts locais."
-echo "      Nesse caso, usa um cartão virtual descartável (ex: MBnet, Revolut)."
+echo "Agora: liga a VPN (Warp), usa um email NOVO e abre o Verdent."
