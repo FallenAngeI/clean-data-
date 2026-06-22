@@ -1,24 +1,32 @@
 #!/bin/bash
-# Verdent Trial Reset for macOS (COMPLETO)
-# Apaga todos os vestígios locais para simular primeira execução.
+# Verdent Trial Reset — Estrutura Corrigida (validada pelo Opus 4.8)
 
 echo "Starting Verdent Reset..."
 
-# Fechar a Verdent e processos relacionados
+# Fechar a Verdent
 pkill -i Verdent 2>/dev/null
+sleep 1
 
-# Remover TUDO o que a Verdent guarda localmente
+# Apagar Application Support (contém storage, sentry, caches, cookies, etc.)
 rm -rf ~/Library/Application\ Support/Verdent
+
+# Apagar logs
 rm -rf ~/Library/Logs/Verdent
-rm -f  ~/Library/Preferences/ai.verdent.deck.plist
-rm -rf ~/Library/Caches/com.verdent.app 2>/dev/null           # (caso exista cache separada)
+
+# Apagar preferências
+rm -f ~/Library/Preferences/ai.verdent.deck.plist
+
+# Apagar saved state (se existir)
 rm -rf ~/Library/Saved\ Application\ State/com.verdent.app.savedState 2>/dev/null
 
-echo "Todos os dados locais da Verdent foram removidos."
-echo "Agora:"
-echo "1. Liga a VPN (Warp ou outra) para mudar de IP."
-echo "2. Cria uma conta NOVA com um email que nunca tenha sido usado na Verdent."
-echo "3. Instala/Abre a Verdent. Ela vai recriar os ficheiros como se fosse a primeira vez."
+# ⚠️ Pasta oculta descoberta pelo Opus 4.8
+rm -rf ~/.verdent
+
 echo ""
-echo "Nota: Se o servidor exigir cartão de crédito, isso NÃO é controlado pelo teu PC."
-echo "Nesse caso, a única forma de obter a trial gratuita é usar um cartão virtual descartável (ex: MBnet, Revolut)."
+echo "✅ Reset completo."
+echo "Agora:"
+echo "1. Liga a VPN (Warp) para mudar de IP."
+echo "2. USA UM EMAIL NOVO (nunca usado no Verdent)."
+echo "3. Abre a Verdent — ela vai recriar o anchor e device_id do zero."
+echo ""
+echo "NOTA: Se o servidor pedir cartão de crédito, não há script local que resolva."
